@@ -39,7 +39,7 @@ module alu(input rst, input clk, output [31:0] memop, output [31:0] memaddress, 
 		$display("Mode is %d", mode);
 
 		if (rst == 1) begin
-			pc <= 4096;
+			pc <= 'h400000;
 			mode <= 0;
 			loadmode <= 0;
 		end
@@ -111,7 +111,7 @@ module alu(input rst, input clk, output [31:0] memop, output [31:0] memaddress, 
 						6'b000010: begin // j
 							pc <= {pc[32:29], addr, 2'b0};
 							mode <= 0;
-							$display("j %d", addr);
+							$display("j %x", addr);
 						end
 						6'b100100: begin // lbu
 							case (loadmode)

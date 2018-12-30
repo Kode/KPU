@@ -2,12 +2,18 @@
 
 #include <stdio.h>
 
-const int memsize = 1024 * 1024;
-static unsigned char memory[memsize];
+const int datasize = 1024 * 1024;
+static unsigned char data[datasize];
+const int textsize = 1024 * 1024;
+static unsigned char text[textsize];
+const int textoffset = 0x100000 << 2;
 
 int main() {
-	for (int i = 0; i < memsize; ++i) {
-		memory[i] = 0;
+	for (int i = 0; i < datasize; ++i) {
+		data[i] = 0;
+	}
+	for (int i = 0; i < textsize; ++i) {
+		text[i] = 0;
 	}
 
 	{
@@ -15,16 +21,16 @@ int main() {
 		fseek(file, 0, SEEK_END);
 		int size = ftell(file);
 		fseek(file, 0, SEEK_SET);
-		fread(&memory[0], size, 1, file);
+		fread(&data[0], size, 1, file);
 		fclose(file);
 	}
 
 	{
-		FILE* file = fopen("asm/test.bin", "rb");
+		FILE* file = fopen("asm/text.bin", "rb");
 		fseek(file, 0, SEEK_END);
 		int size = ftell(file);
 		fseek(file, 0, SEEK_SET);
-		fread(&memory[4096], size, 1, file);
+		fread(&text[0], size, 1, file);
 		fclose(file);
 	}
 
@@ -38,19 +44,20 @@ int main() {
 	top.eval();
 	top.rst = 0;
 
-	for (int i = 0; i < 50 && !Verilated::gotFinish(); ++i) {
+	for (int i = 0; i < 100 && !Verilated::gotFinish(); ++i) {
 		top.clk = 1;
 		top.eval();
 		top.clk = 0;
 		top.eval();
 
 		if (top.memop == 1) {
-			unsigned int* addr = (unsigned int*)&memory[top.memaddress];
+			printf("Preparing address %x.\n", top.memaddress);
+			unsigned int* addr = top.memaddress >= textoffset ? (unsigned int*)&text[top.memaddress - textoffset] : (unsigned int*)&data[top.memaddress];
 			top.memindata = *addr;
-			printf("Loaded %d from address %d.\n", *addr, top.memaddress);
+			printf("Loaded %d from address %x.\n", *addr, top.memaddress);
 		}
 		else if (top.memop == 2) {
-			unsigned int* addr = (unsigned int*)&memory[top.memaddress];
+			unsigned int* addr = top.memaddress >= textoffset ? (unsigned int*)&text[top.memaddress - textoffset] : (unsigned int*)&data[top.memaddress];
 			*addr = top.memoutdata;
 		}
 	}
