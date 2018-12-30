@@ -3,7 +3,13 @@
 #include <iostream>
 using namespace std;
 
+static unsigned int instructions[256];
+
 int main() {
+	FILE* file = fopen("asm/test.bin", "rb");
+	fread(instructions, 4 * 2, 1, file);
+	fclose(file);
+
 	Valu top;
 
 	// Reset
@@ -13,14 +19,11 @@ int main() {
 
 	top.instruction = 0x0;
 
-	for (int time = 0; time < 10 && !Verilated::gotFinish(); ++time) {
-		cout << "out: " << top.out << endl;
+	for (int i = 0; i < 2 && !Verilated::gotFinish(); ++i) {
+		top.instruction = instructions[i];
 
-		// Rising edge
 		top.clk = 1;
 		top.eval();
-
-		// Falling edge
 		top.clk = 0;
 		top.eval();
 	}
