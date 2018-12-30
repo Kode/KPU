@@ -74,11 +74,21 @@ module alu(input rst, input clk, output [31:0] memop, output [31:0] memaddress, 
 									mode <= 0;
 									$display("add %d %d %d", rd, rs, rt);
 								end
+								6'b100010: begin // sub
+									registers[rd] <= registers[rs] - registers[rt];
+									pc <= pc + 4;
+									mode <= 0;
+									$display("add %d %d %d", rd, rs, rt);
+								end
 								6'b101010: begin // slt
 									registers[rd] <= (registers[rs] < registers[rt]) ? 1 : 0;
 									pc <= pc + 4;
 									mode <= 0;
 									$display("slt %d %d %d", rd, rs, rt);
+								end
+								6'b001000: begin // jr
+									$display("Jumping back");
+									$finish;
 								end
 								default: begin
 									$display("Unknown func %b", func);
@@ -98,7 +108,19 @@ module alu(input rst, input clk, output [31:0] memop, output [31:0] memaddress, 
 						end
 						6'b000100: begin // beq
 							if (registers[rt] == registers[rs]) begin
-								pc <= pc + 4 + {14'b0, imm, 2'b0};
+								pc <= pc + 4 + {{14{imm[15]}}, imm, 2'b0};
+								mode <= 0;
+								$display("beq - jumping %d %d %d", rt, rs, imm);
+							end
+							else begin
+								pc <= pc + 4;
+								mode <= 0;
+								$display("beq - not jumping %d %d %d", rt, rs, imm);
+							end
+						end
+						6'b000101: begin // bne
+							if (registers[rt] != registers[rs]) begin
+								pc <= pc + 4 + {{14{imm[15]}}, imm, 2'b0};
 								mode <= 0;
 								$display("beq - jumping %d %d %d", rt, rs, imm);
 							end
