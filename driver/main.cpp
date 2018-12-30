@@ -44,7 +44,7 @@ int main() {
 	top.eval();
 	top.rst = 0;
 
-	for (int i = 0; i < 5000 && !Verilated::gotFinish(); ++i) {
+	for (int i = 0; i < 100000 && !Verilated::gotFinish(); ++i) {
 		top.clk = 1;
 		top.eval();
 		top.clk = 0;

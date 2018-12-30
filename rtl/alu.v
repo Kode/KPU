@@ -5,7 +5,7 @@ module alu(input rst, input clk, output [31:0] memop, output [31:0] memaddress, 
 
 	reg [3:0] mode;
 
-	reg [3:0] loadmode;
+	reg [3:0] instruction_mode;
 
 	reg [31:0] instruction;
 
@@ -41,7 +41,7 @@ module alu(input rst, input clk, output [31:0] memop, output [31:0] memaddress, 
 		if (rst == 1) begin
 			pc <= 'h400000;
 			mode <= 0;
-			loadmode <= 0;
+			instruction_mode <= 0;
 		end
 		else begin
 			case (mode)
@@ -90,6 +90,11 @@ module alu(input rst, input clk, output [31:0] memop, output [31:0] memaddress, 
 									$display("Jumping back");
 									$finish;
 								end
+								6'b001100: begin // syscall
+									$display("syscall");
+									pc <= pc + 4;
+									mode <= 0;
+								end
 								default: begin
 									$display("Unknown func %b", func);
 								end
@@ -105,6 +110,44 @@ module alu(input rst, input clk, output [31:0] memop, output [31:0] memaddress, 
 							pc <= pc + 4;
 							mode <= 0;
 							$display("lui %d %d", rt, imm);
+						end
+						6'b101011: begin // sw
+							case (instruction_mode)
+								0: begin
+									memaddress <= registers[rs] + imm;
+									memoutdata <= registers[rt];
+									memop <= 2;
+									instruction_mode <= 1;
+									mode <= 2;
+									$display("sw (step 1) %d %d %d", rs, imm, rt);
+								end
+								1: begin
+									memop <= 0;
+									instruction_mode <= 0;
+									pc <= pc + 4;
+									mode <= 0;
+									$display("sw (step 2) %d %d %d", rs, imm, rt);
+								end
+							endcase
+						end
+						6'b100011: begin // lw
+							case (instruction_mode)
+								0: begin
+									memaddress <= registers[rs] + imm;
+									memop <= 1;
+									instruction_mode <= 1;
+									mode <= 2;
+									$display("lw (step 1) %d %d %d", rs, imm, rt);
+								end
+								1: begin
+									registers[rt] <= memindata;
+									memop <= 0;
+									instruction_mode <= 0;
+									pc <= pc + 4;
+									mode <= 0;
+									$display("lw (step 2) %d %d %d", rs, imm, rt);
+								end
+							endcase
 						end
 						6'b000100: begin // beq
 							if (registers[rt] == registers[rs]) begin
@@ -130,24 +173,30 @@ module alu(input rst, input clk, output [31:0] memop, output [31:0] memaddress, 
 								$display("beq - not jumping %d %d %d", rt, rs, imm);
 							end
 						end
+						6'b000011: begin // jal
+							registers[31] <= pc + 8;
+							pc <= {pc[32:29], addr, 2'b0};
+							mode <= 0;
+							$display("jal %x", addr);
+						end
 						6'b000010: begin // j
 							pc <= {pc[32:29], addr, 2'b0};
 							mode <= 0;
 							$display("j %x", addr);
 						end
 						6'b100100: begin // lbu
-							case (loadmode)
+							case (instruction_mode)
 								0: begin
 									memaddress <= {16'b0, imm};
 									memop <= 1;
-									loadmode <= 1;
+									instruction_mode <= 1;
 									mode <= 2;
 									$display("lbu (step 1) %d %d", rt, imm);
 								end
 								1: begin
 									registers[rt] <= {24'b0, memindata[8:0]};
 									memop <= 0;
-									loadmode <= 0;
+									instruction_mode <= 0;
 									pc <= pc + 4;
 									mode <= 0;
 									$display("lbu (step 2) %d %d", rt, imm);
