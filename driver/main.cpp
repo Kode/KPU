@@ -3,28 +3,28 @@
 #include <iostream>
 using namespace std;
 
-int main()
-{
-    Valu top;
+int main() {
+	Valu top;
 
-    // Reset
-    top.rst = top.clk = 0;
-    top.eval();
-    top.rst = 1;
+	// Reset
+	top.rst = top.clk = 0;
+	top.eval();
+	top.rst = 1;
 
-    for (int time = 0; time < 10 && !Verilated::gotFinish(); time++)
-    {
-        cout << "out: " << top.out << endl;
-        
-        // Rising edge
-        top.clk = 1;
-        top.eval();
+	top.instruction = 0x0;
 
-        // Falling edge
-        top.clk = 0;
-        top.eval();
-    }
-    top.final();
+	for (int time = 0; time < 10 && !Verilated::gotFinish(); ++time) {
+		cout << "out: " << top.out << endl;
 
-    return 0;
+		// Rising edge
+		top.clk = 1;
+		top.eval();
+
+		// Falling edge
+		top.clk = 0;
+		top.eval();
+	}
+	top.final();
+
+	return 0;
 }
