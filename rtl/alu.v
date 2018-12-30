@@ -12,7 +12,7 @@ module alu(input rst, input clk, output [31:0] memop, output [31:0] memaddress, 
 	always @ (posedge clk) begin
 		reg [5:0] opcode;
 
-		reg [26:0] addr;
+		reg [25:0] addr;
 
 		reg [4:0] rs;
 		reg [4:0] rt;
@@ -20,7 +20,7 @@ module alu(input rst, input clk, output [31:0] memop, output [31:0] memaddress, 
 		reg [15:0] imm;
 
 		reg [4:0] rd;
-		reg [4:0] shamt;
+		//reg [4:0] shamt;
 		reg [5:0] func;
 
 		opcode = instruction[31:26];
@@ -33,7 +33,7 @@ module alu(input rst, input clk, output [31:0] memop, output [31:0] memaddress, 
 		imm = instruction[15:0];
 
 		rd = instruction[15:11];
-		shamt = instruction[10:6];
+		//shamt = instruction[10:6];
 		func = instruction[5:0];
 
 		$display("Mode is %d", mode);
@@ -114,7 +114,7 @@ module alu(input rst, input clk, output [31:0] memop, output [31:0] memaddress, 
 						6'b101011: begin // sw
 							case (instruction_mode)
 								0: begin
-									memaddress <= registers[rs] + imm;
+									memaddress <= registers[rs] + {16'b0, imm};
 									memoutdata <= registers[rt];
 									memop <= 2;
 									instruction_mode <= 1;
@@ -133,7 +133,7 @@ module alu(input rst, input clk, output [31:0] memop, output [31:0] memaddress, 
 						6'b100011: begin // lw
 							case (instruction_mode)
 								0: begin
-									memaddress <= registers[rs] + imm;
+									memaddress <= registers[rs] + {16'b0, imm};
 									memop <= 1;
 									instruction_mode <= 1;
 									mode <= 2;
@@ -175,12 +175,12 @@ module alu(input rst, input clk, output [31:0] memop, output [31:0] memaddress, 
 						end
 						6'b000011: begin // jal
 							registers[31] <= pc + 8;
-							pc <= {pc[32:29], addr, 2'b0};
+							pc <= {pc[31:28], addr, 2'b0};
 							mode <= 0;
 							$display("jal %x", addr);
 						end
 						6'b000010: begin // j
-							pc <= {pc[32:29], addr, 2'b0};
+							pc <= {pc[31:28], addr, 2'b0};
 							mode <= 0;
 							$display("j %x", addr);
 						end
@@ -194,7 +194,7 @@ module alu(input rst, input clk, output [31:0] memop, output [31:0] memaddress, 
 									$display("lbu (step 1) %d %d", rt, imm);
 								end
 								1: begin
-									registers[rt] <= {24'b0, memindata[8:0]};
+									registers[rt] <= {24'b0, memindata[7:0]};
 									memop <= 0;
 									instruction_mode <= 0;
 									pc <= pc + 4;
