@@ -10,9 +10,23 @@ int main() {
 		memory[i] = 0;
 	}
 
-	FILE* file = fopen("asm/test.bin", "rb");
-	fread(memory, 4 * 2, 1, file);
-	fclose(file);
+	{
+		FILE* file = fopen("asm/data.bin", "rb");
+		fseek(file, 0, SEEK_END);
+		int size = ftell(file);
+		fseek(file, 0, SEEK_SET);
+		fread(&memory[0], size, 1, file);
+		fclose(file);
+	}
+
+	{
+		FILE* file = fopen("asm/test.bin", "rb");
+		fseek(file, 0, SEEK_END);
+		int size = ftell(file);
+		fseek(file, 0, SEEK_SET);
+		fread(&memory[4096], size, 1, file);
+		fclose(file);
+	}
 
 	Valu top;
 
@@ -24,7 +38,7 @@ int main() {
 	top.eval();
 	top.rst = 0;
 
-	for (int i = 0; i < 10 && !Verilated::gotFinish(); ++i) {
+	for (int i = 0; i < 50 && !Verilated::gotFinish(); ++i) {
 		top.clk = 1;
 		top.eval();
 		top.clk = 0;
