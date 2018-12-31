@@ -1,0 +1,8 @@
+[submodule "verilator"]
+	path = verilator
+	url = https://git.kode.tech/r/verilator.git
+	branch = master
+[submodule "Kore"]
+	path = Kore
+	url = https://github.com/Kode/Kore.git
+	branch = master

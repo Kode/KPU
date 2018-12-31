@@ -17,7 +17,7 @@ int main() {
 	}
 
 	{
-		FILE* file = fopen("asm/data.bin", "rb");
+		FILE* file = fopen("data.bin", "rb");
 		fseek(file, 0, SEEK_END);
 		int size = ftell(file);
 		fseek(file, 0, SEEK_SET);
@@ -26,7 +26,7 @@ int main() {
 	}
 
 	{
-		FILE* file = fopen("asm/text.bin", "rb");
+		FILE* file = fopen("text.bin", "rb");
 		fseek(file, 0, SEEK_END);
 		int size = ftell(file);
 		fseek(file, 0, SEEK_SET);

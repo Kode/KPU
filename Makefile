@@ -18,8 +18,8 @@ $(OBJ_DIR):
 	mkdir -p $(OBJ_DIR)
 
 $(TARGET): dirs rtl/alu.v driver/main.cpp
-	verilator -Wall -Wno-fatal -O3 --x-assign fast --noassert -cc rtl/alu.v --exe driver/main.cpp
-	$(MAKE) -j -C $(OBJ_DIR) -f $(VM_PREFIX).mk
+	verilator/bin/verilator -Wall -Wno-fatal -O3 --x-assign fast --noassert -cc rtl/alu.v --exe driver/main.cpp
+	#$(MAKE) -j -C $(OBJ_DIR) -f $(VM_PREFIX).mk
 
 test: $(TARGET)
 	$(TARGET)
