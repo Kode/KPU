@@ -13,6 +13,10 @@ satz4:
 main:
 
 #hanoi(3, 1, 2, 3);
+	addi $t0, $zero, 0xff00ffff
+	addi $t1, $zero, 0x800000
+	sw $t0, 30000($t1)
+
 	addi $v0,$zero,5
 	syscall
 	addi $a0,$v0,0

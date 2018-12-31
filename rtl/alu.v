@@ -103,7 +103,13 @@ module alu(input rst, input clk, output [31:0] memop, output [31:0] memaddress, 
 							registers[rt] <= registers[rs] + {16'b0, imm};
 							pc <= pc + 4;
 							mode <= 0;
-							$display("addi %d %d", rs, imm);
+							$display("addi %d %d %d", rt, rs, imm);
+						end
+						6'b001101: begin // ori
+							registers[rt] <= registers[rs] + {16'b0, imm};
+							pc <= pc + 4;
+							mode <= 0;
+							$display("ori %d %d %d", rt, rs, imm);
 						end
 						6'b001111: begin // lui
 							registers[rt] <= {imm, 16'b0};

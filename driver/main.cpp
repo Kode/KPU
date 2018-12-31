@@ -29,11 +29,11 @@ namespace {
 	
 	const int textsize = 1024 * 1024;
 	u8 text[textsize];
-	const int textoffset = 0x100000 << 2;
+	const int textoffset = 0x400000;
 
 	const int framebuffersize = 640 * 480 * 4;
 	u8* framebuffer = nullptr;
-	const int framebufferoffset = 0x100000 << 4;
+	const int framebufferoffset = 0x800000;
 
 	Graphics4::Shader* vertexShader;
 	Graphics4::Shader* fragmentShader;
@@ -203,9 +203,13 @@ int kore(int argc, char** argv) {
 	top.rst = 1;
 	top.clk = 0;
 	top.eval();
+
 	top.clk = 1;
 	top.eval();
+
+	top.clk = 0;
 	top.rst = 0;
+	top.eval();
 
 	Kore::System::setCallback(update);
 	Kore::System::start();
